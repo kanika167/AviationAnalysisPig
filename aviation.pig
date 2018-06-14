@@ -1,0 +1,11 @@
+delayed_data = load '/home/kanika/Desktop/datasets/DF.txt' using PigStorage(',');
+dest_data = foreach delayed_data generate $18 as destination;
+group_dest_data = group dest_data by destination;
+count_dest_data = foreach group_dest_data generate group as dest, COUNT(dest_data.destination) as count;
+airport_data = load '/home/kanika/Desktop/datasets/airports.txt' using PigStorage(',');
+airport_city = foreach airport_data generate $0 as abbr, $2 as city;
+join_data = JOIN count_dest_data by dest, airport_city by abbr;
+selected_data = foreach join_data generate count_dest_data::dest, airport_city::city,count_dest_data::count;
+order_data = order selected_data by count desc;
+limit_data = limit order_data 10;
+dump limit_data;
